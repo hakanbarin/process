@@ -1,1 +1,3 @@
-    int id1 = fork();
+f(pipe(fd) == -1){
+        printf("failed in pipe");
+    }
