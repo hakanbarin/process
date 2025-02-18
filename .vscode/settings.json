@@ -4,6 +4,13 @@
         "string.h": "c",
         "unistd.h": "c",
         "ctype.h": "c",
-        "stat.h": "c"
+        "stat.h": "c",
+        "time.h": "c",
+        "errno.h": "c",
+        "error_t.h": "c",
+        "features.h": "c",
+        "stdio.h": "c",
+        "signal.h": "c",
+        "fcntl.h": "c"
     }
 }

@@ -6,7 +6,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <time.h>
-
+// fifo ile okuma yazmayı yapıyor.
 #define ARR_SIZE 5
 
 int main(){

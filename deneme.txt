@@ -1,0 +1,10 @@
+hello bro
+rtt min/avg/max/mdev = 25.281/26.243/27.606/0.990 ms
+a.
+64 bytes from sof02s44-in-f14.1e100.net (142.250.187.110): icmp_seq=1 ttl=114 time=28.4 ms
+64 bytes from sof02s44-in-f14.1e100.net (142.250.187.110): icmp_seq=2 ttl=114 time=27.3 ms
+64 bytes from sof02s44-in-f14.1e100.net (142.250.187.110): icmp_seq=3 ttl=114 time=27.8 ms
+
+--- google.com ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2001ms
+rtt min/avg/max/mdev = 27.347/27.859/28.421/0.439 ms
