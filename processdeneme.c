@@ -26,9 +26,189 @@
 #include <time.h>
 #include <signal.h>
 
-int main()
-{
+
+#define PROCESS_NUM 3
+
+
+int main(){
+
+    int pipes[PROCESS_NUM + 1][2]; // 3 process için 4 tane boru hattı gerekiyor şema çizerek düşün
+    int pid[PROCESS_NUM];
+
+    int i;
+    for(i =0; i < PROCESS_NUM + 1;i++){
+        if(pipe(pipes[i]) == -1){
+            printf("pipe olusturulamadi");
+            return 1;
+        }
+    }
+    //https://stackoverflow.com/questions/26793402/visually-what-happens-to-fork-in-a-for-loop
+    for(i = 0; i < PROCESS_NUM;i++){
+
+        pid[i] = fork();
+
+        if(pid[i] == -1){
+            printf("error with creating pid");
+            return 2;
+        }
+
+        if(pid[i] == 0){
+            
+            for(int j = 0; j < PROCESS_NUM + 1; j++){
+                if(i != j){
+
+                    close(pipes[j][0]); // OKUMAYI İ'DEN YAZMAYI İ+1 DEN YAPTIĞI İÇİN BU DURUMLAR HARİÇ HEPSİNİ KAPATIYORUZ.
+                                        // SOL ÜSTTEN SAĞ ALTA DOĞRU OKUYOR 2x1 MATRİX DÜŞÜN 5 TANE YAN YANA
+                }
+                if(i + 1 != j){
+                    close(pipes[j][1]);
+                }
+            }
+        
+            int x;
+            if(read(pipes[i][0], &x, sizeof(int)) == -1){
+                printf("error read pipes");
+            }
+            printf("(%d) got result = %d\n",i,x);
+            x++;
+            if(write(pipes[i+1][1], &x, sizeof(int)) == -1){
+                printf("error write pipes");
+            }
+            printf("(%d) sent result = %d\n",i,x);
+            close(pipes[i][0]);
+            close(pipes[i+1][1]);
+
+        return 0; // burada çocuk processlerin artmasını engelliyoruz sadece parent processler üzerinden ilerleniyor.
+    }
+
+       
+    }
+    for(int j = 0; j < PROCESS_NUM + 1; j++){
+        if(j != PROCESS_NUM){
+
+            close(pipes[j][0]);
+        }
+        if(j != 0){
+            close(pipes[j][1]);
+        }
+    }
+    int y = 5;
+    if(write(pipes[0][1], &y, sizeof(int)) == -1){
+        printf("error main write ");
+    }
+    if(read(pipes[PROCESS_NUM][0], &y, sizeof(int)) == -1){
+        printf("error main read ");
+    }
+
+    close(pipes[0][1]);
+    close(pipes[PROCESS_NUM][0]);
+
+    for(i = 0; i < PROCESS_NUM; i++){
+        waitpid(pid[i], NULL, 0);
+    }
+    printf("final result = %d",y);
 }
+
+
+
+
+
+
+
+/*
+int main() {
+    pid_t pid = fork();
+
+    if (pid == 0) {
+        printf("çocuk Süreç: PID = %d\n", getpid());
+        printf("pid in child = %d ",pid);
+    } else if (pid > 0) {
+        printf("ana Süreç: PID = %d\n", getpid());
+        printf("pid in parent = %d\n", pid);
+    } else{
+        perror("fork failed");
+        return 1;
+    }
+
+    return 0;
+}
+
+*/
+
+/*
+int main() {
+    int fd[3][2];
+    for(int i = 0; i < 3; i++){
+        if(pipe(fd[i]) == -1){
+            return 1;
+        }
+    }
+
+    int pid1 = fork();
+
+    if(pid1 == 0){
+        int x;
+        close(fd[0][1]);
+        close(fd[1][0]);
+        close(fd[2][0]);
+        close(fd[2][1]);
+
+        if(read(fd[0][0], &x, sizeof(int)) == -1){
+            return 2;
+        }
+        printf("cocuk1 aldim  x = %d\n",x);
+        x = x + 5;
+        if(write(fd[1][1], &x, sizeof(int)) == -1){
+            return 3;
+        }
+        printf("cocuk2 yazdim  x = %d\n",x);
+        close(fd[0][0]);
+        close(fd[1][1]);
+        printf("cocuk 1 pid %d parent pid %d\n",getpid(), getppid());
+
+    }
+    // BU ŞEKİLDE 2 ÇOCUK OLUŞTURLUYOR EĞER FORKLARI ALT ALTA ÇAĞIRSAYDIK 4 FARKLI PROCESS(3 ÇOCUK) OLUŞACAKTI.
+    int pid2 = fork();
+    if(pid2 == 0){
+        int x;
+        close(fd[0][0]);
+        close(fd[0][1]);
+        close(fd[1][1]);
+        close(fd[2][2]);
+        if(read(fd[1][0], &x, sizeof(int)) == -1){
+            return 4;
+        }
+        printf("cocuk2 aldim  x = %d\n",x);
+        if(write(fd[2][1], &x, sizeof(int)) == -1){
+            return 5;
+        }
+        printf("cocuk2 yazdim  x = %d\n",x);
+
+        close(fd[2][1]);
+        close(fd[1][0]);
+        printf("cocuk 2 pid %d parent pid %d\n",getpid(), getppid());
+
+    }
+    close(fd[0][0]);
+    close(fd[1][0]);
+    close(fd[1][1]);
+    close(fd[2][1]);
+    int x = 5;
+    if(write(fd[0][1], &x, sizeof(int)) == -1){
+        return 6;
+    }
+    printf("baba yazdim  x = %d\n",x);
+    if(read(fd[2][0], &x, sizeof(int)) == -1){
+        return 7;
+    }
+    close(fd[0][1]);
+    close(fd[2][0]);
+    waitpid(pid1,NULL,0); // wait pid ile ne kadar beklersek bekleyelim istediğimiz processi ilk başta sonlandırabiliyoruz.
+    waitpid(pid2,NULL,0);
+}
+
+
+*/
 
 /*
 int main(){
